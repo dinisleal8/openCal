@@ -1,0 +1,22 @@
+{
+    "Goals saved. Let's go!": "Metas guardadas. Vamos a isto!",
+    "Goals updated.": "Metas atualizadas.",
+    "Macros must add up to 100% (currently :sum%).": "Os macros têm de somar 100% (atualmente :sum%).",
+    "Food logged.": "Comida registada.",
+    "Entry updated.": "Registo atualizado.",
+    "Entry removed.": "Registo removido.",
+    "Water logged.": "Água registada.",
+    "Water entry removed.": "Registo de água removido.",
+    "Weight recorded.": "Peso registado.",
+    "Weigh-in removed.": "Pesagem removida.",
+    "Exercise logged.": "Exercício registado.",
+    "Exercise removed.": "Exercício removido.",
+    "Profile updated.": "Perfil atualizado.",
+    "User created.": "Utilizador criado.",
+    "User deleted.": "Utilizador eliminado.",
+    "Connected to Google Health.": "Ligado ao Google Health.",
+    "Disconnected from Google Health.": "Desligado do Google Health.",
+    "Sync started.": "Sincronização iniciada.",
+    "Sync completed.": "Sincronização concluída.",
+    "Sync failed. Please reconnect and try again.": "A sincronização falhou. Volte a ligar e tente novamente."
+}
