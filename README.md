@@ -9,7 +9,7 @@ A self-hosted, mobile-first calorie tracking app. Log meals manually, by **AI ph
 
 - **Goals & targets** — onboarding wizard calculates BMR/TDEE (Mifflin-St Jeor) and daily calorie/macro/water targets from your body stats, activity level and goal.
 - **Today dashboard** — calorie ring, macro bars, meals by type, water quick-add, weight and exercise, plus band activity stats.
-- **AI photo logging** — snap a meal and let Google Gemini estimate its nutrition.
+- **AI photo logging** — snap a meal and let Google Gemini or OpenCode Zen/Go estimate its nutrition.
 - **Barcode lookup** — resolve products via Open Food Facts (backend ready; UI in progress).
 - **History** — 7-day and 30-day views (paged week by week) with weight trend chart and averages.
 - **Google Health sync** — connect a Fitbit / Pixel Watch / band and pull steps, active calories and weight.
@@ -24,7 +24,7 @@ A self-hosted, mobile-first calorie tracking app. Log meals manually, by **AI ph
 - **Auth:** Laravel Fortify (login, 2FA, passkeys, password reset) with registration disabled
 - **Routing helpers:** Laravel Wayfinder (generated TypeScript route functions)
 - **Database:** SQLite by default (MySQL/PostgreSQL also supported)
-- **Integrations:** Google Gemini (photos), Google Health API (wearables), Open Food Facts (barcodes)
+- **Integrations:** AI photo recognition (Google Gemini or any OpenAI-compatible API), Google Health API (wearables), Open Food Facts (barcodes)
 
 ## Requirements
 
@@ -35,7 +35,7 @@ A self-hosted, mobile-first calorie tracking app. Log meals manually, by **AI ph
 
 Optional (only for the related features):
 
-- A **Google Gemini API key** for AI photo recognition
+- An **AI provider key** for AI photo recognition: a Google Gemini API key, or an OpenCode Zen/Go key (or any OpenAI-compatible endpoint)
 - **Google Health OAuth credentials** for wearable sync
 
 ## Installation
@@ -105,11 +105,11 @@ For production, run `npm run build` so the Vite manifest is generated; otherwise
 
 The owner account is created by the seeder from your `.env` values:
 
-| Variable         | Default                 |
-| ---------------- | ----------------------- |
-| `OWNER_NAME`     | `Owner`                 |
-| `OWNER_EMAIL`    | `owner@opencal.local`   |
-| `OWNER_PASSWORD` | `password`              |
+| Variable         | Default               |
+| ---------------- | --------------------- |
+| `OWNER_NAME`     | `Owner`               |
+| `OWNER_EMAIL`    | `owner@opencal.local` |
+| `OWNER_PASSWORD` | `password`            |
 
 > Change `OWNER_PASSWORD` in `.env` **before** running `php artisan migrate --seed`. The owner is the only account allowed to create additional users.
 
@@ -117,25 +117,58 @@ The owner account is created by the seeder from your `.env` values:
 
 All configuration lives in `.env`. The most relevant variables:
 
-| Variable                              | Purpose                                                        |
-| ------------------------------------- | -------------------------------------------------------------- |
-| `APP_URL`                             | Base URL used to build OAuth redirect URIs                     |
-| `APP_LOCALE`                          | Default locale (`en` or `pt`)                                  |
-| `DB_CONNECTION`                       | `sqlite` (default), `mysql`, `pgsql`                           |
-| `OWNER_NAME` / `OWNER_EMAIL` / `OWNER_PASSWORD` | First (owner) account created by the seeder           |
-| `OPENCAL_PHOTO_DISK`                  | Filesystem disk for meal photos (default `local`)              |
-| `GEMINI_API_KEY`                      | Google Gemini key for AI photo recognition                     |
-| `GEMINI_MODEL`                        | Gemini model (default `gemini-2.5-flash`)                      |
-| `GOOGLE_HEALTH_CLIENT_ID`             | Google OAuth client ID for wearable sync                       |
-| `GOOGLE_HEALTH_CLIENT_SECRET`         | Google OAuth client secret                                     |
-| `GOOGLE_HEALTH_REDIRECT`              | OAuth callback — must match your Google Cloud console entry    |
-| `OPENFOODFACTS_USER_AGENT`            | User-Agent sent to the Open Food Facts API                     |
+| Variable                                        | Purpose                                                                                             |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `APP_URL`                                       | Base URL used to build OAuth redirect URIs                                                          |
+| `APP_LOCALE`                                    | Default locale (`en` or `pt`)                                                                       |
+| `DB_CONNECTION`                                 | `sqlite` (default), `mysql`, `pgsql`                                                                |
+| `OWNER_NAME` / `OWNER_EMAIL` / `OWNER_PASSWORD` | First (owner) account created by the seeder                                                         |
+| `OPENCAL_PHOTO_DISK`                            | Filesystem disk for meal photos (default `local`)                                                   |
+| `OPENCAL_AI_PROVIDER`                           | AI photo provider: `gemini` (default) or `opencode`                                                 |
+| `GEMINI_API_KEY`                                | Google Gemini key (when `OPENCAL_AI_PROVIDER=gemini`)                                               |
+| `GEMINI_MODEL`                                  | Gemini model (default `gemini-2.5-flash`)                                                           |
+| `OPENCODE_API_KEY`                              | OpenCode Zen/Go key (when `OPENCAL_AI_PROVIDER=opencode`)                                           |
+| `OPENCODE_BASE_URL`                             | OpenAI-compatible base URL (Go: `https://opencode.ai/zen/go/v1`, Zen: `https://opencode.ai/zen/v1`) |
+| `OPENCODE_MODEL`                                | Vision model id (default `deepseek-v4-flash-vision-exp`)                                            |
+| `GOOGLE_HEALTH_CLIENT_ID`                       | Google OAuth client ID for wearable sync                                                            |
+| `GOOGLE_HEALTH_CLIENT_SECRET`                   | Google OAuth client secret                                                                          |
+| `GOOGLE_HEALTH_REDIRECT`                        | OAuth callback — must match your Google Cloud console entry                                         |
+| `OPENFOODFACTS_USER_AGENT`                      | User-Agent sent to the Open Food Facts API                                                          |
 
-### AI photo recognition (Gemini)
+### AI photo recognition
+
+Choose one provider via `OPENCAL_AI_PROVIDER`. The model must support **vision** (image input).
+
+**Option A — Google Gemini** (`OPENCAL_AI_PROVIDER=gemini`, default)
 
 1. Create an API key at [Google AI Studio](https://aistudio.google.com/app/apikey).
-2. Set `GEMINI_API_KEY` in `.env`.
-3. Restart the app. The photo button on the food form will now return AI estimates.
+2. Set `GEMINI_API_KEY` in `.env` (optionally `GEMINI_MODEL`).
+3. Restart the app.
+
+**Option B — OpenCode Zen / Go** (`OPENCAL_AI_PROVIDER=opencode`)
+
+OpenCode Zen and Go share the same API key and expose an OpenAI-compatible endpoint, but they use **different base URLs**:
+
+- **Go** (fixed subscription): `https://opencode.ai/zen/go/v1`
+- **Zen** (pay-as-you-go): `https://opencode.ai/zen/v1`
+
+Using the wrong one will fail with a `CreditsError: Insufficient balance`.
+
+1. Sign in at [opencode.ai/zen](https://opencode.ai/zen), copy your API key.
+2. Set in `.env` (Go subscription shown):
+
+    ```dotenv
+    OPENCAL_AI_PROVIDER=opencode
+    OPENCODE_API_KEY=your-key
+    OPENCODE_BASE_URL=https://opencode.ai/zen/go/v1
+    OPENCODE_MODEL=deepseek-v4-flash-vision-exp
+    ```
+
+    `deepseek-v4-flash-vision-exp` is a cheap, high-throughput vision model included with Go. Any other OpenAI-compatible vision model works too — point `OPENCODE_BASE_URL`/`OPENCODE_MODEL` at it (OpenAI, OpenRouter, a local Ollama server, etc.).
+
+3. Restart the app. The photo tile on the food form will return AI estimates.
+
+Both providers share the same response contract and the same tests, so switching only requires the `.env` changes above.
 
 ### Wearable sync (Google Health)
 
@@ -167,7 +200,7 @@ app/
   Http/Requests/           Form request validation
   Models/                  Goal, FoodEntry, WaterLog, WeighIn, ExerciseLog, ActivityDay, Product, Photo, GoogleHealthAccount
   Policies/                Per-model authorization
-  Services/                DailyTargetsService, DailySummaryService, GeminiService, GoogleHealthService
+  Services/                DailyTargetsService, DailySummaryService, GoogleHealthService, FoodPhotoAnalyzer (Gemini / OpenAI-compatible drivers)
 resources/
   js/pages/                Inertia pages (dashboard, history, onboarding, goal edit, settings)
   js/components/           UI + feature components (forms, charts, navigation)

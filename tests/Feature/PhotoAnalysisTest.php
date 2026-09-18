@@ -1,14 +1,15 @@
 <?php
 
+use App\Models\Photo;
 use App\Models\User;
-use App\Services\GeminiService;
+use App\Services\FoodPhotoAnalyzer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 test('authenticated user can upload a photo and get analysis', function () {
     Storage::fake('local');
 
-    $mockGemini = Mockery::mock(GeminiService::class);
+    $mockGemini = Mockery::mock(FoodPhotoAnalyzer::class);
     $mockGemini->shouldReceive('analyzePhoto')->once()->andReturn([
         [
             'name' => 'Grilled Chicken',
@@ -19,7 +20,7 @@ test('authenticated user can upload a photo and get analysis', function () {
             'serving_description' => '1 breast (150g)',
         ],
     ]);
-    $this->app->instance(GeminiService::class, $mockGemini);
+    $this->app->instance(FoodPhotoAnalyzer::class, $mockGemini);
 
     $user = User::factory()->create();
 
@@ -83,9 +84,9 @@ test('missing photo field returns validation error', function () {
 test('gemini service failure returns appropriate error', function () {
     Storage::fake('local');
 
-    $mockGemini = Mockery::mock(GeminiService::class);
+    $mockGemini = Mockery::mock(FoodPhotoAnalyzer::class);
     $mockGemini->shouldReceive('analyzePhoto')->once()->andReturn(null);
-    $this->app->instance(GeminiService::class, $mockGemini);
+    $this->app->instance(FoodPhotoAnalyzer::class, $mockGemini);
 
     $user = User::factory()->create();
 
@@ -104,4 +105,41 @@ test('gemini service failure returns appropriate error', function () {
     $this->assertDatabaseHas('photos', [
         'user_id' => $user->id,
     ]);
+});
+
+test('owner can stream their stored photo', function () {
+    Storage::fake('local');
+
+    $user = User::factory()->create();
+
+    $photo = Photo::factory()->create([
+        'user_id' => $user->id,
+        'path' => 'photos/'.$user->id.'/meal.jpg',
+        'mime' => 'image/jpeg',
+    ]);
+
+    Storage::disk('local')->put($photo->path, 'fake-image-bytes');
+
+    $this->actingAs($user)
+        ->get(route('photos.show', $photo))
+        ->assertOk()
+        ->assertHeader('Content-Type', 'image/jpeg');
+});
+
+test('non-owner cannot stream another users photo', function () {
+    Storage::fake('local');
+
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+
+    $photo = Photo::factory()->create([
+        'user_id' => $owner->id,
+        'path' => 'photos/'.$owner->id.'/meal.jpg',
+    ]);
+
+    Storage::disk('local')->put($photo->path, 'fake-image-bytes');
+
+    $this->actingAs($other)
+        ->get(route('photos.show', $photo))
+        ->assertForbidden();
 });

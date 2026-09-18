@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\PhotoAnalysisController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PhotoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('goal', [GoalController::class, 'update'])->name('goal.update');
 
     Route::post('api/photo/analyze', [PhotoAnalysisController::class, 'analyze'])->name('api.photo.analyze');
+
+    Route::get('photos/{photo}', [PhotoController::class, 'show'])->name('photos.show');
 
     Route::put('locale/{locale}', function (Request $request, string $locale) {
         abort_unless(in_array($locale, config('opencal.locales'), true), 404);

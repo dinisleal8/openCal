@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('food', [FoodEntryController::class, 'store'])->name('food.store');
+    Route::post('food/bulk', [FoodEntryController::class, 'bulkStore'])->name('food.bulk');
     Route::put('food/{foodEntry}', [FoodEntryController::class, 'update'])->name('food.update');
     Route::delete('food/{foodEntry}', [FoodEntryController::class, 'destroy'])->name('food.destroy');
 

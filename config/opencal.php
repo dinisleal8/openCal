@@ -34,6 +34,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AI Photo Recognition
+    |--------------------------------------------------------------------------
+    |
+    | Choose the provider used to analyze meal photos: "gemini" (Google Gemini)
+    | or "opencode" (any OpenAI-compatible API, e.g. OpenCode Zen / Go).
+    |
+    */
+
+    'ai' => [
+        'provider' => env('OPENCAL_AI_PROVIDER', 'gemini'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Photo Uploads
     |--------------------------------------------------------------------------
     */

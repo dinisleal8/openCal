@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Services\FoodPhotoAnalyzer;
+use App\Services\GeminiService;
+use App\Services\OpenAiCompatibleService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +20,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FoodPhotoAnalyzer::class, function (): FoodPhotoAnalyzer {
+            return match (config('opencal.ai.provider')) {
+                'opencode' => new OpenAiCompatibleService,
+                default => new GeminiService,
+            };
+        });
     }
 
     /**

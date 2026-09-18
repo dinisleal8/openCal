@@ -65,6 +65,7 @@ export type Photo = {
     id: number;
     user_id: number;
     path: string;
+    url: string;
     mime: string;
     created_at: string;
 };

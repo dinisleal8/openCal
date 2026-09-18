@@ -39,6 +39,20 @@ return [
         'key' => env('GEMINI_API_KEY'),
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'max_tokens' => (int) env('GEMINI_MAX_TOKENS', 8192),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 120),
+    ],
+
+    'opencode' => [
+        'key' => env('OPENCODE_API_KEY'),
+        'model' => env('OPENCODE_MODEL', 'deepseek-v4-flash-vision-exp'),
+        // Go subscribers use https://opencode.ai/zen/go/v1
+        // Zen (pay-as-you-go) uses https://opencode.ai/zen/v1
+        'base_url' => env('OPENCODE_BASE_URL', 'https://opencode.ai/zen/go/v1'),
+        // Reasoning models spend tokens "thinking" before answering, so the
+        // output budget must be generous or the visible answer comes back empty.
+        'max_tokens' => (int) env('OPENCODE_MAX_TOKENS', 8192),
+        'timeout' => (int) env('OPENCODE_TIMEOUT', 120),
     ],
 
     'google_health' => [
