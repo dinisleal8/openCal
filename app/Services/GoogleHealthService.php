@@ -14,6 +14,7 @@ class GoogleHealthService
     private const BASE_URL = 'https://www.googleapis.com/fitness/v1/users/me';
 
     private const SCOPES = [
+        'openid',
         'https://www.googleapis.com/auth/fitness.activity.read',
         'https://www.googleapis.com/auth/fitness.body.read',
     ];
