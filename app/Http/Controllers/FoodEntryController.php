@@ -14,9 +14,11 @@ class FoodEntryController extends Controller
 {
     public function store(FoodEntryRequest $request): RedirectResponse
     {
+        $validated = $request->validated();
+
         Auth::user()->foodEntries()->create([
-            ...$request->validated(),
-            'source' => 'manual',
+            ...$validated,
+            'source' => $validated['source'] ?? 'manual',
         ]);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('food.saved')]);
@@ -25,14 +27,15 @@ class FoodEntryController extends Controller
     }
 
     /**
-     * Store several food entries at once, typically the items detected in a photo.
+     * Store several food entries at once, typically the items detected in a photo
+     * or a text description.
      */
     public function bulkStore(BulkFoodEntryRequest $request): RedirectResponse
     {
         $validated = $request->validated();
         $user = Auth::user();
         $photoId = $validated['photo_id'] ?? null;
-        $source = $photoId ? 'ai_photo' : 'manual';
+        $source = $validated['source'] ?? ($photoId ? 'ai_photo' : 'manual');
 
         $entries = array_map(fn (array $item): array => [
             'user_id' => $user->id,

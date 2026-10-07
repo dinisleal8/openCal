@@ -26,14 +26,6 @@ class OpenAiCompatibleService implements FoodPhotoAnalyzer
      */
     public function analyzePhoto(string $filePath): ?array
     {
-        $apiKey = config('services.opencode.key');
-
-        if (empty($apiKey)) {
-            Log::warning('OpenCode / OpenAI-compatible API key is not configured.');
-
-            return null;
-        }
-
         if (! file_exists($filePath)) {
             Log::warning('Photo file not found for AI analysis.', ['path' => $filePath]);
 
@@ -50,6 +42,39 @@ class OpenAiCompatibleService implements FoodPhotoAnalyzer
 
         $imageData = base64_encode($contents);
         $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
+
+        return $this->analyze([
+            ['type' => 'text', 'text' => FoodAnalysis::PROMPT],
+            [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => "data:{$mimeType};base64,{$imageData}",
+                ],
+            ],
+        ]);
+    }
+
+    public function analyzeText(string $description): ?array
+    {
+        return $this->analyze([
+            ['type' => 'text', 'text' => FoodAnalysis::TEXT_PROMPT."\n\nDescription: ".$description],
+        ]);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $content
+     * @return array<int, array{name: string, calories: float, protein_g: float, carbs_g: float, fat_g: float, serving_description: string}>|null
+     */
+    private function analyze(array $content): ?array
+    {
+        $apiKey = config('services.opencode.key');
+
+        if (empty($apiKey)) {
+            Log::warning('OpenCode / OpenAI-compatible API key is not configured.');
+
+            return null;
+        }
+
         $model = config('services.opencode.model', 'deepseek-v4-flash-vision-exp');
         $baseUrl = rtrim((string) config('services.opencode.base_url', 'https://opencode.ai/zen/go/v1'), '/');
         $maxTokens = (int) config('services.opencode.max_tokens', 8192);
@@ -68,15 +93,7 @@ class OpenAiCompatibleService implements FoodPhotoAnalyzer
                     'messages' => [
                         [
                             'role' => 'user',
-                            'content' => [
-                                ['type' => 'text', 'text' => FoodAnalysis::PROMPT],
-                                [
-                                    'type' => 'image_url',
-                                    'image_url' => [
-                                        'url' => "data:{$mimeType};base64,{$imageData}",
-                                    ],
-                                ],
-                            ],
+                            'content' => $content,
                         ],
                     ],
                 ]);
@@ -109,9 +126,8 @@ class OpenAiCompatibleService implements FoodPhotoAnalyzer
 
             return $parsed;
         } catch (\Throwable $e) {
-            Log::error('AI photo analysis failed.', [
+            Log::error('AI food analysis failed.', [
                 'message' => $e->getMessage(),
-                'file' => $filePath,
             ]);
 
             return null;

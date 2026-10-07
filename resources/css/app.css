@@ -137,7 +137,21 @@
         @apply border-border;
     }
 
+    html {
+        scrollbar-gutter: stable;
+    }
+
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/*
+ * react-remove-scroll adds a `margin-right` compensation to <body> whenever a
+ * modal (Radix Dialog) opens, assuming the scrollbar is being removed. Since
+ * `scrollbar-gutter: stable` above already reserves that space, the extra
+ * margin would shift the page content. Neutralize it here.
+ */
+html body[data-scroll-locked] {
+    margin-right: 0 !important;
 }

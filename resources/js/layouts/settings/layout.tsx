@@ -1,90 +1,89 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
-import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import {
+    Palette,
+    Plug,
+    Settings2,
+    ShieldCheck,
+    User,
+    Users,
+    type LucideIcon,
+} from 'lucide-react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
+import { useI18n, type TranslationKey } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { index as indexIntegrations } from '@/routes/integrations';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import { index as indexUsers } from '@/routes/users';
-import type { NavItem } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+type NavItem = {
+    key: TranslationKey;
+    href: string;
+    icon: LucideIcon;
+};
+
+const navItems: NavItem[] = [
+    { key: 'settings.navProfile', href: edit().url, icon: User },
     {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
+        key: 'settings.navSecurity',
+        href: editSecurity().url,
+        icon: ShieldCheck,
     },
     {
-        title: 'Security',
-        href: editSecurity(),
-        icon: null,
+        key: 'settings.navAppearance',
+        href: editAppearance().url,
+        icon: Palette,
     },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
-    },
-    {
-        title: 'Users',
-        href: indexUsers().url,
-        icon: null,
-    },
-    {
-        title: 'Integrations',
-        href: indexIntegrations(),
-        icon: null,
-    },
+    { key: 'settings.users', href: indexUsers().url, icon: Users },
+    { key: 'settings.integrations', href: indexIntegrations().url, icon: Plug },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
+    const { t } = useI18n();
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6">
-            <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
-            />
-
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
-                    <nav
-                        className="flex flex-col space-y-1 space-x-0"
-                        aria-label="Settings"
-                    >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(item.href),
-                                })}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
-                    </nav>
-                </aside>
-
-                <Separator className="my-6 lg:hidden" />
-
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
-                        {children}
-                    </section>
+        <div className="mx-auto w-full max-w-xl px-5 py-6">
+            <div className="mb-6 flex items-center gap-3">
+                <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-xl">
+                    <Settings2 className="size-5" />
+                </span>
+                <div>
+                    <h1 className="text-xl font-bold">{t('settings.title')}</h1>
+                    <p className="text-muted-foreground text-sm">
+                        {t('settings.description')}
+                    </p>
                 </div>
             </div>
+
+            <nav
+                className="bg-muted/50 mb-6 flex gap-1 overflow-x-auto rounded-xl p-1"
+                aria-label={t('settings.title')}
+            >
+                {navItems.map((item) => {
+                    const active = isCurrentOrParentUrl(item.href);
+
+                    return (
+                        <Link
+                            key={item.key}
+                            href={item.href}
+                            className={cn(
+                                'flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors',
+                                active
+                                    ? 'bg-background text-foreground shadow-xs'
+                                    : 'text-muted-foreground hover:text-foreground',
+                            )}
+                        >
+                            <item.icon className="size-4" />
+                            <span>{t(item.key)}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            <section className="space-y-6">{children}</section>
         </div>
     );
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FoodSource;
 use App\Enums\MealType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,6 +26,7 @@ class BulkFoodEntryRequest extends FormRequest
             'date' => ['required', 'date_format:Y-m-d'],
             'meal_type' => ['required', Rule::enum(MealType::class)],
             'photo_id' => ['nullable', 'integer', 'exists:photos,id'],
+            'source' => ['nullable', Rule::enum(FoodSource::class)->only([FoodSource::Manual, FoodSource::AiText, FoodSource::Barcode])],
             'items' => ['required', 'array', 'min:1', 'max:30'],
             'items.*.name' => ['required', 'string', 'max:255'],
             'items.*.serving_description' => ['nullable', 'string', 'max:255'],

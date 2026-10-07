@@ -11,7 +11,7 @@ export type GoalType = 'lose' | 'maintain' | 'gain';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export type FoodSource = 'manual' | 'ai_photo' | 'barcode';
+export type FoodSource = 'manual' | 'ai_photo' | 'ai_text' | 'barcode';
 
 export type ExerciseSource = 'manual' | 'google_health';
 

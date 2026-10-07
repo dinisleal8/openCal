@@ -148,6 +148,75 @@ test('food entry with valid data is accepted', function () {
     ]);
 });
 
+test('food entry can be tagged with a barcode source', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->postJson(route('food.store'), [
+            'date' => now()->toDateString(),
+            'meal_type' => 'lunch',
+            'name' => 'Coca-Cola',
+            'calories_kcal' => 139,
+            'protein_g' => 0,
+            'carbs_g' => 35,
+            'fat_g' => 0,
+            'source' => 'barcode',
+            'barcode' => '5901234123457',
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('food_entries', [
+        'user_id' => $user->id,
+        'source' => 'barcode',
+        'barcode' => '5901234123457',
+    ]);
+});
+
+test('food entry rejects a source that cannot be set by the client', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('food.store'), [
+            'date' => now()->toDateString(),
+            'meal_type' => 'lunch',
+            'name' => 'Test Food',
+            'calories_kcal' => 100,
+            'protein_g' => 0,
+            'carbs_g' => 0,
+            'fat_g' => 0,
+            'source' => 'ai_photo',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('source');
+});
+
+test('bulk food entries can be tagged with an ai text source', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->postJson(route('food.bulk'), [
+            'date' => now()->toDateString(),
+            'meal_type' => 'breakfast',
+            'source' => 'ai_text',
+            'items' => [
+                [
+                    'name' => 'Scrambled eggs',
+                    'calories_kcal' => 180,
+                    'protein_g' => 12,
+                    'carbs_g' => 1,
+                    'fat_g' => 14,
+                ],
+            ],
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('food_entries', [
+        'user_id' => $user->id,
+        'name' => 'Scrambled eggs',
+        'source' => 'ai_text',
+    ]);
+});
+
 test('saving weight twice for the same day updates the existing entry', function () {
     $user = User::factory()->create();
 

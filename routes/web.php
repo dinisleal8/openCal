@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\FoodAnalysisController;
+use App\Http\Controllers\Api\InstanceController;
 use App\Http\Controllers\Api\PhotoAnalysisController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\OnboardingController;
@@ -9,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
 
+Route::get('api/instance', [InstanceController::class, 'show'])->name('api.instance');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('onboarding', [OnboardingController::class, 'create'])->name('onboarding');
 
@@ -17,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('goal', [GoalController::class, 'update'])->name('goal.update');
 
     Route::post('api/photo/analyze', [PhotoAnalysisController::class, 'analyze'])->name('api.photo.analyze');
+    Route::post('api/food/analyze-text', [FoodAnalysisController::class, 'analyzeText'])->name('api.food.analyze-text');
 
     Route::get('photos/{photo}', [PhotoController::class, 'show'])->name('photos.show');
 

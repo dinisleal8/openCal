@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FoodSource;
 use App\Enums\MealType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,6 +38,8 @@ class FoodEntryRequest extends FormRequest
             'carbs_g' => ['required', 'numeric', 'min:0', 'max:1000'],
             'fat_g' => ['required', 'numeric', 'min:0', 'max:1000'],
             'photo_id' => ['nullable', 'integer', 'exists:photos,id'],
+            'source' => ['nullable', Rule::enum(FoodSource::class)->only([FoodSource::Manual, FoodSource::AiText, FoodSource::Barcode])],
+            'barcode' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

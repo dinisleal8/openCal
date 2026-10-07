@@ -16,6 +16,18 @@ Analyze this food photo. For each distinct food item visible, provide:
 Return ONLY a valid JSON array of objects with these exact keys. Do not include markdown, backticks, or any text outside the JSON array. If you cannot identify any food, return an empty array [].
 PROMPT;
 
+    public const TEXT_PROMPT = <<<'PROMPT'
+Analyze this food description. For each distinct food item mentioned, provide:
+- name: the food name
+- calories: estimated calories (number)
+- protein_g: estimated protein in grams (number)
+- carbs_g: estimated carbohydrates in grams (number)
+- fat_g: estimated fat in grams (number)
+- serving_description: a brief description of the estimated serving size
+
+Return ONLY a valid JSON array of objects with these exact keys. Do not include markdown, backticks, or any text outside the JSON array. If you cannot identify any food, return an empty array [].
+PROMPT;
+
     /**
      * Parse a model response into normalized nutrition items.
      *

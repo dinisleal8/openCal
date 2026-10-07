@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Instance Version
+    |--------------------------------------------------------------------------
+    |
+    | Reported by the /api/instance endpoint so mobile clients can display
+    | the version of the self-hosted instance they are connected to.
+    |
+    */
+
+    'version' => env('OPENCAL_VERSION', '1.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Owner Account
     |--------------------------------------------------------------------------
     |

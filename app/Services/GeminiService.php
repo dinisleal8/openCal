@@ -14,14 +14,6 @@ class GeminiService implements FoodPhotoAnalyzer
      */
     public function analyzePhoto(string $filePath): ?array
     {
-        $apiKey = config('services.gemini.key');
-
-        if (empty($apiKey)) {
-            Log::warning('Gemini API key is not configured.');
-
-            return null;
-        }
-
         if (! file_exists($filePath)) {
             Log::warning('Photo file not found for Gemini analysis.', ['path' => $filePath]);
 
@@ -38,6 +30,39 @@ class GeminiService implements FoodPhotoAnalyzer
 
         $imageData = base64_encode($contents);
         $mimeType = mime_content_type($filePath) ?: 'image/jpeg';
+
+        return $this->analyze([
+            ['text' => FoodAnalysis::PROMPT],
+            [
+                'inline_data' => [
+                    'mime_type' => $mimeType,
+                    'data' => $imageData,
+                ],
+            ],
+        ]);
+    }
+
+    public function analyzeText(string $description): ?array
+    {
+        return $this->analyze([
+            ['text' => FoodAnalysis::TEXT_PROMPT."\n\nDescription: ".$description],
+        ]);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $parts
+     * @return array<int, array{name: string, calories: float, protein_g: float, carbs_g: float, fat_g: float, serving_description: string}>|null
+     */
+    private function analyze(array $parts): ?array
+    {
+        $apiKey = config('services.gemini.key');
+
+        if (empty($apiKey)) {
+            Log::warning('Gemini API key is not configured.');
+
+            return null;
+        }
+
         $model = config('services.gemini.model', 'gemini-2.5-flash');
         $baseUrl = config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
 
@@ -46,15 +71,7 @@ class GeminiService implements FoodPhotoAnalyzer
                 ->post("{$baseUrl}/models/{$model}:generateContent?key={$apiKey}", [
                     'contents' => [
                         [
-                            'parts' => [
-                                ['text' => FoodAnalysis::PROMPT],
-                                [
-                                    'inline_data' => [
-                                        'mime_type' => $mimeType,
-                                        'data' => $imageData,
-                                    ],
-                                ],
-                            ],
+                            'parts' => $parts,
                         ],
                     ],
                     'generationConfig' => [
@@ -92,7 +109,6 @@ class GeminiService implements FoodPhotoAnalyzer
         } catch (\Throwable $e) {
             Log::error('Gemini analysis failed.', [
                 'message' => $e->getMessage(),
-                'file' => $filePath,
             ]);
 
             return null;
