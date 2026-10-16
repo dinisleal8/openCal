@@ -37,6 +37,33 @@ const pt = {
         settings: 'Definições',
         openMenu: 'Abrir menu',
     },
+    notifications: {
+        title: 'Notificações',
+        description: 'Receba lembretes para manter o registo em dia.',
+        markAllRead: 'Marcar todas como lidas',
+        empty: 'Ainda sem notificações.',
+        manage: 'Gerir lembretes',
+        push: {
+            title: 'Notificações push',
+            description:
+                'Receba lembretes neste dispositivo, mesmo com a app fechada.',
+            unsupported: 'Este navegador não suporta notificações push.',
+            enabled: 'Ativadas neste dispositivo',
+            enable: 'Ativar neste dispositivo',
+            disable: 'Desativar',
+            iosHint:
+                'No iPhone, adicione o openCal ao ecrã principal primeiro para receber notificações.',
+            denied: 'As notificações estão bloqueadas. Permita-as nas definições do navegador.',
+        },
+        reminders: {
+            title: 'Lembretes de registo',
+            meal: 'Lembrete de refeições',
+            water: 'Lembrete de água',
+            weighIn: 'Lembrete de pesagem',
+            timezoneNote:
+                'Os lembretes usam o fuso horário do servidor e são enviados apenas quando ainda não registou.',
+        },
+    },
     onboarding: {
         title: 'Bem-vindo ao openCal',
         subtitle: 'Configure as suas metas de calorias em menos de um minuto.',
@@ -269,6 +296,7 @@ const pt = {
         navProfile: 'Perfil',
         navSecurity: 'Segurança',
         navAppearance: 'Aparência',
+        navNotifications: 'Notificações',
         appearanceTitle: 'Definições de aparência',
         appearanceDesc: 'Atualize as definições de aparência da sua conta',
         appearanceLight: 'Claro',

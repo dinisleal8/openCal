@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { NotificationsSummary, PushConfig } from '@/types/notifications';
 
 declare module 'react' {
     interface InputHTMLAttributes<T> {
@@ -13,6 +14,8 @@ declare module '@inertiajs/core' {
             locale: string;
             auth: Auth;
             sidebarOpen: boolean;
+            notifications: NotificationsSummary | null;
+            push: PushConfig;
             [key: string]: unknown;
         };
     }

@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Flame, Globe } from 'lucide-react';
+import { NotificationBell } from '@/components/notification-bell';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,8 @@ export function AppTopbar() {
                 </Link>
 
                 <div className="flex items-center gap-1">
+                    <NotificationBell />
+
                     <Button
                         variant="ghost"
                         size="sm"

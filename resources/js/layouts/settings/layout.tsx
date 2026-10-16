@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import type { PropsWithChildren } from 'react';
 import {
+    BellRing,
     Palette,
     Plug,
     Settings2,
@@ -14,6 +15,7 @@ import { useI18n, type TranslationKey } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { edit as editAppearance } from '@/routes/appearance';
 import { index as indexIntegrations } from '@/routes/integrations';
+import { edit as editNotifications } from '@/routes/notifications';
 import { edit } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import { index as indexUsers } from '@/routes/users';
@@ -35,6 +37,11 @@ const navItems: NavItem[] = [
         key: 'settings.navAppearance',
         href: editAppearance().url,
         icon: Palette,
+    },
+    {
+        key: 'settings.navNotifications',
+        href: editNotifications().url,
+        icon: BellRing,
     },
     { key: 'settings.users', href: indexUsers().url, icon: Users },
     { key: 'settings.integrations', href: indexIntegrations().url, icon: Plug },

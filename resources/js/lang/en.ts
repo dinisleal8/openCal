@@ -37,6 +37,33 @@ const en = {
         settings: 'Settings',
         openMenu: 'Open menu',
     },
+    notifications: {
+        title: 'Notifications',
+        description: 'Get reminders to keep your tracking on track.',
+        markAllRead: 'Mark all read',
+        empty: 'No notifications yet.',
+        manage: 'Manage reminders',
+        push: {
+            title: 'Push notifications',
+            description:
+                'Receive reminders on this device, even when openCal is closed.',
+            unsupported: 'This browser does not support push notifications.',
+            enabled: 'Enabled on this device',
+            enable: 'Enable on this device',
+            disable: 'Disable',
+            iosHint:
+                'On iPhone, add openCal to your Home Screen first to receive notifications.',
+            denied: 'Notifications are blocked. Allow them in your browser settings.',
+        },
+        reminders: {
+            title: 'Tracking reminders',
+            meal: 'Meal logging reminder',
+            water: 'Water reminder',
+            weighIn: 'Weigh-in reminder',
+            timezoneNote:
+                'Reminders use the server timezone and are only sent when you have not logged yet.',
+        },
+    },
     onboarding: {
         title: 'Welcome to openCal',
         subtitle: 'Set up your calorie goals in under a minute.',
@@ -268,6 +295,7 @@ const en = {
         navProfile: 'Profile',
         navSecurity: 'Security',
         navAppearance: 'Appearance',
+        navNotifications: 'Notifications',
         appearanceTitle: 'Appearance settings',
         appearanceDesc: 'Update the appearance settings for your account',
         appearanceLight: 'Light',

@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\GoogleHealthController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Settings\IntegrationsController;
+use App\Http\Controllers\Settings\NotificationSettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Settings\UserManagementController;
@@ -13,6 +16,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('settings/notifications', [NotificationSettingsController::class, 'edit'])->name('notifications.edit');
+    Route::put('settings/notifications', [NotificationSettingsController::class, 'update'])->name('notifications.update');
+
+    Route::post('settings/notifications/push', [PushSubscriptionController::class, 'store'])->name('pushSubscriptions.store');
+    Route::delete('settings/notifications/push', [PushSubscriptionController::class, 'destroy'])->name('pushSubscriptions.destroy');
+
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::get('settings/google-health/redirect', [GoogleHealthController::class, 'redirect'])->name('google-health.redirect');
     Route::get('settings/google-health/callback', [GoogleHealthController::class, 'callback'])->name('google-health.callback');

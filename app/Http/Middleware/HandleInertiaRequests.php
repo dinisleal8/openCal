@@ -43,6 +43,44 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'notifications' => fn (): ?array => $this->notifications($request),
+            'push' => [
+                'enabled' => filled(config('webpush.vapid.public_key')),
+                'publicKey' => config('webpush.vapid.public_key'),
+            ],
+        ];
+    }
+
+    /**
+     * Recent notifications and unread count for the authenticated user.
+     *
+     * @return array{unread_count: int, items: array<int, array<string, mixed>>}|null
+     */
+    protected function notifications(Request $request): ?array
+    {
+        $user = $request->user();
+
+        if ($user === null) {
+            return null;
+        }
+
+        return [
+            'unread_count' => $user->unreadNotifications()->count(),
+            'items' => $user->notifications()
+                ->latest()
+                ->limit(15)
+                ->get()
+                ->map(fn ($notification): array => [
+                    'id' => $notification->id,
+                    'type' => $notification->data['type'] ?? null,
+                    'title' => $notification->data['title'] ?? '',
+                    'body' => $notification->data['body'] ?? '',
+                    'url' => $notification->data['url'] ?? '/',
+                    'read_at' => $notification->read_at?->toIso8601String(),
+                    'created_at' => $notification->created_at?->toIso8601String(),
+                    'created_at_diff' => $notification->created_at?->diffForHumans(),
+                ])
+                ->all(),
         ];
     }
 }
