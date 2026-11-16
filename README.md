@@ -126,7 +126,7 @@ All configuration lives in `.env`. The most relevant variables:
 | `OPENCAL_PHOTO_DISK`                            | Filesystem disk for meal photos (default `local`)                                                   |
 | `OPENCAL_AI_PROVIDER`                           | AI photo provider: `gemini` (default) or `opencode`                                                 |
 | `GEMINI_API_KEY`                                | Google Gemini key (when `OPENCAL_AI_PROVIDER=gemini`)                                               |
-| `GEMINI_MODEL`                                  | Gemini model (default `gemini-2.5-flash`)                                                           |
+| `GEMINI_MODEL`                                  | Gemini model (default `gemini-3.5-flash-lite`, free tier)                                           |
 | `OPENCODE_API_KEY`                              | OpenCode Zen/Go key (when `OPENCAL_AI_PROVIDER=opencode`)                                           |
 | `OPENCODE_BASE_URL`                             | OpenAI-compatible base URL (Go: `https://opencode.ai/zen/go/v1`, Zen: `https://opencode.ai/zen/v1`) |
 | `OPENCODE_MODEL`                                | Vision model id (default `deepseek-v4-flash-vision-exp`)                                            |
@@ -141,9 +141,13 @@ Choose one provider via `OPENCAL_AI_PROVIDER`. The model must support **vision**
 
 **Option A — Google Gemini** (`OPENCAL_AI_PROVIDER=gemini`, default)
 
-1. Create an API key at [Google AI Studio](https://aistudio.google.com/app/apikey).
+1. Create an API key at [Google AI Studio](https://aistudio.google.com/app/apikey) — no credit card needed.
 2. Set `GEMINI_API_KEY` in `.env` (optionally `GEMINI_MODEL`).
 3. Restart the app.
+
+No billing account is required. Free-tier limits are per Google Cloud project (not per key) and shown in AI Studio. On the free tier, `gemini-3.5-flash-lite` (the default) allows roughly 15 requests/minute and 500 requests/day, which is plenty for normal daily logging (one request per photo/text analysis). The regular Flash models are capped much lower (around 20 requests/day). Note that Google may use free-tier content to improve its products.
+
+**Already subscribed to Google AI Pro?** The Pro subscription's higher quota applies only to the AI Studio web UI, not to API keys. What it does include is **$10/month in Google Cloud credits** (Google Developer Program) that can pay for Gemini API usage. To use them: enable Cloud Billing on the project, make the one-time $5 minimum prepayment, then claim the credits in AI Studio. At Flash-Lite rates, daily photo analysis costs roughly $1–2/month, so the monthly credit covers it. Paid-tier requests are also not used to improve Google's products. Google AI Plus includes no credits, and a university-issued Workspace for Education account is not the same thing as an AI Pro subscription.
 
 **Option B — OpenCode Zen / Go** (`OPENCAL_AI_PROVIDER=opencode`)
 
@@ -168,7 +172,20 @@ Using the wrong one will fail with a `CreditsError: Insufficient balance`.
 
 3. Restart the app. The photo tile on the food form will return AI estimates.
 
-Both providers share the same response contract and the same tests, so switching only requires the `.env` changes above.
+**Option C — OpenRouter free models** (no card, uses the OpenAI-compatible driver)
+
+OpenRouter exposes free vision models (`:free` suffix) through an OpenAI-compatible API, so no code change is needed:
+
+```dotenv
+OPENCAL_AI_PROVIDER=opencode
+OPENCODE_API_KEY=your-openrouter-key
+OPENCODE_BASE_URL=https://openrouter.ai/api/v1
+OPENCODE_MODEL=google/gemma-4-26b-a4b-it:free
+```
+
+Free accounts get 20 requests/minute and 50 requests/day (1,000/day after a one-time $10 credit purchase), which is enough for a single person logging a few meals a day but not for several users. Free-model availability can change, so check the [free models list](https://openrouter.ai/models?max_price=0) before picking an ID.
+
+All providers share the same response contract and the same tests, so switching only requires the `.env` changes above.
 
 ### Wearable sync (Google Health)
 

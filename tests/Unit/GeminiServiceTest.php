@@ -81,6 +81,35 @@ test('it strips markdown fences from the response', function () {
     @unlink($path);
 });
 
+test('it skips thought parts and reads the answer part', function () {
+    config()->set('services.gemini.key', 'test-key');
+
+    Http::fake([
+        'generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [
+                [
+                    'finishReason' => 'STOP',
+                    'content' => [
+                        'parts' => [
+                            ['text' => 'The image shows a pizza on a wooden table.', 'thought' => true],
+                            ['text' => '[{"name":"Pizza","calories":850,"protein_g":36,"carbs_g":105,"fat_g":30,"serving_description":"1 medium"}]'],
+                        ],
+                    ],
+                ],
+            ],
+        ]),
+    ]);
+
+    $path = makePhotoFile();
+
+    $items = (new GeminiService)->analyzePhoto($path);
+
+    expect($items)->toBeArray()->toHaveCount(1)
+        ->and($items[0]['name'])->toBe('Pizza');
+
+    @unlink($path);
+});
+
 test('it returns null when the api key is missing', function () {
     config()->set('services.gemini.key', null);
 

@@ -63,7 +63,7 @@ class GeminiService implements FoodPhotoAnalyzer
             return null;
         }
 
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.gemini.model', 'gemini-3.5-flash-lite');
         $baseUrl = config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta');
 
         try {
@@ -83,16 +83,32 @@ class GeminiService implements FoodPhotoAnalyzer
             if (! $response->successful()) {
                 Log::error('Gemini API request failed.', [
                     'status' => $response->status(),
+                    'model' => $model,
                     'body' => $response->body(),
                 ]);
 
                 return null;
             }
 
-            $text = $response->json('candidates.0.content.parts.0.text');
+            $json = $response->json();
+            $candidate = is_array($json) ? ($json['candidates'][0] ?? []) : [];
+            $finishReason = $candidate['finishReason'] ?? null;
 
-            if ($text === null) {
-                Log::warning('Gemini returned no text content.', ['response' => $response->json()]);
+            // Gemini 3 may return thought parts alongside (or before) the answer,
+            // so every non-thought part has to be considered instead of only the first.
+            $text = collect($candidate['content']['parts'] ?? [])
+                ->reject(fn ($part) => ! empty($part['thought']))
+                ->pluck('text')
+                ->filter(fn ($chunk) => is_string($chunk) && trim($chunk) !== '')
+                ->implode("\n");
+
+            if (trim($text) === '') {
+                Log::warning('Gemini returned no text content.', [
+                    'finish_reason' => $finishReason,
+                    'block_reason' => $json['promptFeedback']['blockReason'] ?? null,
+                    'model' => $model,
+                    'response' => $json,
+                ]);
 
                 return null;
             }
@@ -101,6 +117,7 @@ class GeminiService implements FoodPhotoAnalyzer
 
             if ($parsed === null) {
                 Log::warning('Gemini returned unparseable content.', [
+                    'finish_reason' => $finishReason,
                     'text' => mb_substr($text, 0, 1000),
                 ]);
             }
